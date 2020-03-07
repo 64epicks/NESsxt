@@ -1,55 +1,43 @@
-#include <SDL2/SDL.h>
+#include <6502.hpp>
+#include <mapper.hpp>
 #include <iostream>
-#include <inttypes.h>
+#include <streambuf>
+#include <fstream>
+#include <string>
 
-SDL_Window* window;
-SDL_Renderer* renderer;
-SDL_Texture* texture;
+CPU* processor;
+Mapper *mp;
+char ram[0x800];
 
-#define WIDTH 256
-#define HEIGHT 240
-
-void gui_init()
+const char* file = "spacerace.nes";
+unsigned char read(unsigned short address)
 {
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK);
-
-    window = SDL_CreateWindow("NESsxt", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, 0);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
+    switch (address) {
+    case 0x0000 ... 0x1FFF:
+        return ram[address % 0x800];
+    case 0x6000 ... 0xFFFF:
+        return mp->prg_read(address);
+    };
+    return 0;
 }
-void gui_render()
+void write(unsigned short address, unsigned char value)
 {
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
-}
-void gui_run()
-{
-    SDL_Event e;
-    uint32_t frameStart, frameTime;
-    const int FPS   = 60;
-    const int DELAY = 1000.0f / FPS;
-
-    while (true) {
-        frameStart = SDL_GetTicks();
-
-        while (SDL_PollEvent(&e))
-            switch (e.type)
-            {
-            case SDL_QUIT: return;
-            
-            default:
-                break;
-            }
-        gui_render();
-        frameTime = SDL_GetTicks() - frameStart;
-        if (frameTime < DELAY)
-            SDL_Delay((int)(DELAY - frameTime));
+    switch (address) {
+    case 0x0000 ... 0x1FFF:
+        ram[address % 0x800] = value;
+        break;
+    case 0x6000 ... 0xFFFF:
+        return mp->prg_write(address, value);
     }
-
 }
 
-int main(int _argc, char** _argv)
+int main()
 {
-    gui_init();
-    gui_run();
+    std::ifstream t(file);
+    std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+
+    processor = new CPU(read, write);
+    mp = cartridgeParse(str.c_str(), str.length());
+
+    processor->run();
 }

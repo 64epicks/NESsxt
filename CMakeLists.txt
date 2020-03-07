@@ -5,6 +5,7 @@ find_package(SDL2 REQUIRED)
 
 file (GLOB src
     "src/*.cpp"
+    "src/mappers/*.cpp"
 )
 
 add_definitions(-DNO_NAMESPACE)

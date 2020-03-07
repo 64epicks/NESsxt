@@ -109,7 +109,7 @@ void CPU::irq()
     case 1:
         ++cycle_count;
         if (iflag == IRESET)
-            cycle_count += 2;
+            cycle_count += 3;
         break;
     case 2:
         push(PC >> 8);
@@ -216,48 +216,49 @@ void CPU::fetch()
     }
 
     // Exceptions
+    unsigned char opcode = 0x78;
     switch (opcode) {
-        case 0xE0: // CPX
-            addm = IMM;
-            break;
-        case 0xC0: // CPY
-            addm = IMM;
-            break;
-        case 0x6C: // JMP
-            addm = IND;
-            break;
-        case 0x10: // Branch instructions
-        case 0x30:
-        case 0x50:
-        case 0x70:
-        case 0x90:
-        case 0xB0:
-        case 0xD0:
-        case 0xF0:
-        case 0x00: // BRK
-        case 0xAA: // Register tranfer instructions
-        case 0x8A:
-        case 0xCA:
-        case 0xE8:
-        case 0xA8:
-        case 0x98:
-        case 0x88:
-        case 0xC8:
-        case 0x9A:
-        case 0xBA:
-        case 0x40: // RTI
-        case 0x60: // RTS
-        case 0x18: // Flag instructions
-        case 0x38:
-        case 0x58:
-        case 0x78:
-        case 0xB8:
-        case 0xD8:
-        case 0xF8:
-            addm == IMM;
-            break;
-        default:
-            break;
+    case 0xE0: // CPX
+        addm = IMM;
+        break;
+    case 0xC0: // CPY
+        addm = IMM;
+        break;
+    case 0x6C: // JMP
+        addm = IND;
+        break;
+    case 0x10: // Branch instructions
+    case 0x30:
+    case 0x50:
+    case 0x70:
+    case 0x90:
+    case 0xB0:
+    case 0xD0:
+    case 0xF0:
+    case 0x00: // BRK
+    case 0xAA: // Register tranfer instructions
+    case 0x8A:
+    case 0xCA:
+    case 0xE8:
+    case 0xA8:
+    case 0x98:
+    case 0x88:
+    case 0xC8:
+    case 0x9A:
+    case 0xBA:
+    case 0x40: // RTI
+    case 0x60: // RTS
+    case 0x18: // Flag instructions
+    case 0x38:
+    case 0x58:
+    case 0x78:
+    case 0xB8:
+    case 0xD8:
+    case 0xF8:
+        addm == IMM;
+        break;
+    default:
+        break;
     }
 
     if (addm == IMM) {
